@@ -16,6 +16,7 @@ import XMonad.Layout.Tabbed
 import XMonad.Layout.ThreeColumns
 import XMonad.Util.Run(spawnPipe)
 import XMonad.Util.EZConfig(additionalKeys)
+import XMonad.Layout.Minimize
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
 
@@ -51,9 +52,9 @@ myWorkspaces = ["1:term","2:web","3:code","4:vm","5:media"] ++ map show [6..9]
 -- 'className' and 'resource' are used below.
 --
 myManageHook = composeAll
-    [ className =? "Chromium"       --> doShift "2:web"
-    , className =? "Google-chrome"  --> doShift "2:web"
-    , resource  =? "desktop_window" --> doIgnore
+    [ --className =? "Chromium"       --> doShift "2:web"
+    --, className =? "Google-chrome"  --> doShift "2:web"
+      resource  =? "desktop_window" --> doIgnore
     , className =? "Galculator"     --> doFloat
     , className =? "Steam"          --> doFloat
     , className =? "Gimp"           --> doFloat
@@ -76,6 +77,7 @@ myManageHook = composeAll
 -- which denotes layout choice.
 --
 myLayout = avoidStruts (
+    minimize (Tall 1 (3/100) (1/2)) |||
     Tall 1 (3/100) (1/2) |||
     Mirror (Tall 1 (3/100) (1/2)) |||
     tabbed shrinkText tabConfig |||
@@ -167,6 +169,14 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
   , ((modMask .|. controlMask, xK_k),
      spawn "amixer -q set Master 10%+")
 
+  , ((modMask, xK_m),
+     withFocused minimizeWindow)
+
+
+  , ((modMask .|. shiftMask, xK_m),
+     sendMessage RestoreNextMinimizedWin)
+
+
   -- Audio previous.
   , ((0, 0x1008FF16),
      spawn "")
@@ -216,8 +226,8 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
      windows W.focusUp  )
 
   -- Move focus to the master window.
-  , ((modMask, xK_m),
-     windows W.focusMaster  )
+  , ((modMask, xK_f),
+    windows W.focusMaster  )
 
   -- Swap the focused window and the master window.
   , ((modMask, xK_Return),
