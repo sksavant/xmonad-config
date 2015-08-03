@@ -20,6 +20,14 @@ import XMonad.Layout.Minimize
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
 
+import XMonad.Util.Dmenu
+import Control.Monad
+
+quitWithWarning :: X ()
+quitWithWarning = do
+    let m = "confirm quit"
+    s <- dmenu [m]
+    when (m == s) (io (exitWith ExitSuccess))
 
 ------------------------------------------------------------------------
 -- Terminal
@@ -34,7 +42,7 @@ myTerminal = "/usr/bin/terminator"
 -- Workspaces
 -- The default number of workspaces (virtual screens) and their names.
 --
-myWorkspaces = ["1:term","2:web","3:code","4:vm","5:media"] ++ map show [6..9]
+myWorkspaces = ["1:term","2:web","3:pweb","4:work","5:media"] ++ map show [6..9]
 
 
 ------------------------------------------------------------------------
@@ -266,7 +274,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
 
   -- Quit xmonad.
   , ((modMask .|. shiftMask, xK_q),
-     io (exitWith ExitSuccess))
+     quitWithWarning)
 
   -- Restart xmonad.
   , ((modMask, xK_q),
