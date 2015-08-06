@@ -19,6 +19,10 @@ import XMonad.Util.EZConfig(additionalKeys)
 import XMonad.Layout.Minimize
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
+import Graphics.X11.ExtraTypes.XF86
+
+import XMonad.Hooks.EwmhDesktops
+
 
 import XMonad.Util.Dmenu
 import Control.Monad
@@ -167,15 +171,15 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
 
   -- Mute volume.
   , ((modMask .|. controlMask, xK_m),
-     spawn "amixer -q set Master toggle")
+     spawn "amixer -q -c 1 set Headphone toggle")
 
   -- Decrease volume.
-  , ((modMask .|. controlMask, xK_j),
-     spawn "amixer -q set Master 10%-")
+  --, ((modMask .|. controlMask, xK_j),
+     --spawn "amixer -q set Master 10%-")
 
   -- Increase volume.
-  , ((modMask .|. controlMask, xK_k),
-     spawn "amixer -q set Master 10%+")
+  --, ((modMask .|. controlMask, xK_k),
+     --spawn "amixer -q set Master 10%+")
 
   , ((modMask, xK_m),
      withFocused minimizeWindow)
@@ -184,7 +188,15 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
   , ((modMask .|. shiftMask, xK_m),
      sendMessage RestoreNextMinimizedWin)
 
+  -- Audio Lower Volume
+  --, ((0, xF86XK_AudioLowerVolume   ), spawn "amixer -q -c 1 set Master 2%-")
+  --, ((0, xF86XK_AudioRaiseVolume   ), spawn "amixer -q -c 1 set Master 2%+")
+  , ((0, 0x1008FF11), spawn "amixer -q -c 1 set Master 2-")
 
+  , ((0, 0x1008FF13), spawn "amixer -q -c 1 set Master 2+")
+
+
+  --, ((0, xF86XK_AudioMute          ), spawn "amixer set Master toggle")
   -- Audio previous.
   , ((0, 0x1008FF16),
      spawn "")
@@ -342,13 +354,14 @@ myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
 -- By default, do nothing.
 myStartupHook = return ()
 
-
 ------------------------------------------------------------------------
 -- Run xmonad with all the defaults we set up.
 --
 main = do
   xmproc <- spawnPipe "xmobar ~/.xmonad/xmobar.hs"
-  xmonad $ defaults {
+  xmonad $ ewmh defaultConfig{ 
+            handleEventHook = handleEventHook defaultConfig <+> fullscreenEventHook 
+      }  $ defaults {
       logHook = dynamicLogWithPP $ xmobarPP {
             ppOutput = hPutStrLn xmproc
           , ppTitle = xmobarColor xmobarTitleColor "" . shorten 100
